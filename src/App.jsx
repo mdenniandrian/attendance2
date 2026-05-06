@@ -64,7 +64,11 @@ export default function ShiftApp() {
         
         {/* Header & Controls */}
         <div className="bg-gray-800 text-white p-6">
+<<<<<<< HEAD
           <h1 className="text-2xl md:text-3xl font-bold mb-4">Aplikasi Jadwal Shift CS Maxcloud 2026</h1>
+=======
+          <h1 className="text-2xl md:text-3xl font-bold mb-4">Aplikasi Jadwal Shift Maxcloud 2026</h1>
+>>>>>>> e5eea00 (change tittle)
           
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex items-center gap-2">
@@ -153,7 +157,7 @@ export default function ShiftApp() {
       </div>
       
       <div className="max-w-6xl mx-auto mt-6 text-gray-500 text-sm text-left bg-blue-50 border border-blue-200 p-5 rounded-lg space-y-2">
-        <p className="font-bold text-blue-800 text-base mb-2">🔥 ATURAN EMAS YANG BERLAKU:</p>
+        <p className="font-bold text-blue-800 text-base mb-2">🔥 NOTES:</p>
         <p>1. <strong>Rotasi Libur Dinamis:</strong> Hari libur semua orang kini otomatis bergeser maju 1 hari setiap minggunya (Rabu ➔ Kamis ➔ Jumat ➔ Sabtu ➔ Minggu ➔ kembali ke Rabu).</p>
         <p>2. <strong>Shift Konsisten:</strong> Shift kerja akan terus menempel (bahkan melintasi batas hari Minggu ke Senin) dan <strong>TIDAK AKAN BERGANTI</strong> sampai karyawan tersebut mengambil jatah liburnya.</p>
         <p>3. <strong>Urutan Shift Mundur:</strong> Sehabis libur, shift otomatis berganti dengan urutan <code className="bg-blue-100 px-1 rounded text-blue-800">Pagi ➔ Malam ➔ Siang ➔ Pagi 2</code>.</p>
