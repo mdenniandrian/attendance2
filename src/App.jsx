@@ -65,8 +65,6 @@ export default function ShiftApp() {
         {/* Header & Controls */}
         <div className="bg-gray-800 text-white p-6">
           <h1 className="text-2xl md:text-3xl font-bold mb-4">Aplikasi Jadwal Shift CS Maxcloud 2026</h1>
-=======
-          <h1 className="text-2xl md:text-3xl font-bold mb-4">Aplikasi Jadwal Shift Maxcloud 2026</h1>
           
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex items-center gap-2">
