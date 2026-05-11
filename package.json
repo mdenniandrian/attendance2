@@ -13,8 +13,12 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@babel/runtime": "^7.29.2",
     "@tailwindcss/postcss": "^4.2.4",
     "@tailwindcss/vite": "^4.2.4",
+    "dom-to-image-more": "^3.7.2",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },

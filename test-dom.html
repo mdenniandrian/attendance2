@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .box { background-color: oklch(0.7 0.1 200); width: 100px; height: 100px; }
+</style>
+</head>
+<body>
+  <div id="target" class="box">Hello</div>
+  <script type="module">
+    import domtoimage from './node_modules/dom-to-image-more/lib/dom-to-image-more.js';
+    domtoimage.toPng(document.getElementById('target')).then(url => console.log(url.substring(0, 50))).catch(e => console.error(e));
+  </script>
+</body>
+</html>
