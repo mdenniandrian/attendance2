@@ -123,7 +123,10 @@ export default function ShiftApp() {
 
       <style>{`
         @media print {
-          @page { size: landscape A4; margin: 1.5in; }
+          @page { 
+            size: A4 landscape; 
+            margin: 0.2in 0.5in 0in 0.5in; 
+          }
           body { 
             -webkit-print-color-adjust: exact; 
             print-color-adjust: exact; 
