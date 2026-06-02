@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import logoMaxcloud from './assets/Logo-Maxcloud2.png';
 
-const names = ['Diki', 'Bagus', 'Rafi', 'Lukman', 'Rizky'];
-const displayOrder = [4, 3, 2, 1, 0]; // Rizky, Lukman, Rafi, Bagus, Diki
+const employees = [
+  { id: 'rizky', name: 'Rizky', division: 'L1', l1Index: 4 },
+  { id: 'lukman', name: 'Lukman', division: 'L1', l1Index: 3 },
+  { id: 'rafi', name: 'Rafi', division: 'L1', l1Index: 2 },
+  { id: 'bagus', name: 'Bagus', division: 'L1', l1Index: 1 },
+  { id: 'diki', name: 'Diki', division: 'L1', l1Index: 0 },
+  { id: 'denni', name: 'Denni', division: 'L2' },
+  { id: 'ihsan', name: 'Ihsan', division: 'L2' }
+];
+
 const dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 const monthNames = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -21,8 +29,7 @@ function getDayIndex(year, month, day) {
   return Math.floor((current - epoch) / (1000 * 60 * 60 * 24));
 }
 
-// Algoritma Generator Rotasi Shift (Libur Dinamis Maju 1 Hari)
-function getShift(p, dayIndex) {
+function getL1Shift(p, dayIndex) {
   const D = mod(dayIndex, 7);
   const W = Math.floor(dayIndex / 7); // Indeks Minggu
 
@@ -37,9 +44,30 @@ function getShift(p, dayIndex) {
   return baseShifts[mod(p + cycleCompleted, 5)];
 }
 
+// Algoritma Generator Rotasi Shift L1 dan L2
+function getShift(emp, dayIndex) {
+  if (emp.division === 'L1') {
+    const rawShift = getL1Shift(emp.l1Index, dayIndex);
+    if (rawShift === 'L') return 'L';
+    return `${rawShift} (L1)`;
+  } else if (emp.division === 'L2') {
+    const D = mod(dayIndex, 7);
+    if (D === 5 || D === 6) return 'L'; // Sabtu & Minggu libur
+
+    const W = Math.floor(dayIndex / 7); // Indeks Minggu
+    if (emp.name === 'Denni') {
+      return (W % 2 === 0) ? 'S (L2)' : 'P (L2)';
+    } else { // Ihsan
+      return (W % 2 === 0) ? 'P (L2)' : 'S (L2)';
+    }
+  }
+  return 'L';
+}
+
 export default function ShiftApp() {
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(4); // Mei (0-indexed)
+  const today = new Date();
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
   const [holidays, setHolidays] = useState([]);
   const [isYearlyPrint, setIsYearlyPrint] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
@@ -47,14 +75,14 @@ export default function ShiftApp() {
   useEffect(() => {
     const fetchHolidays = async () => {
       try {
-        const response = await fetch(`https://libur.deno.dev/api?year=${year}`);
+        const response = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/ID`);
         const data = await response.json();
         
         let holidaysArray = [];
         if (Array.isArray(data)) {
           holidaysArray = data.map(info => ({
             date: info.date,
-            description: info.name || 'Libur'
+            description: info.localName || info.name || 'Libur'
           }));
         }
         
@@ -82,10 +110,12 @@ export default function ShiftApp() {
 
   // Ultra-modernized shift colors with vibrant backgrounds, high contrast, and subtle shadows
   const shiftColors = {
-    'P': 'bg-sky-500/10 text-sky-700 border border-sky-200/50 hover:bg-sky-500/20 shadow-sm ring-1 ring-sky-500/5',
-    'P2': 'bg-emerald-500/10 text-emerald-700 border border-emerald-200/50 hover:bg-emerald-500/20 shadow-sm ring-1 ring-emerald-500/5',
-    'S': 'bg-orange-500/10 text-orange-700 border border-orange-200/50 hover:bg-orange-500/20 shadow-sm ring-1 ring-orange-500/5',
-    'M': 'bg-violet-500/10 text-violet-700 border border-violet-200/50 hover:bg-violet-500/20 shadow-sm ring-1 ring-violet-500/5',
+    'P (L1)': 'bg-sky-500/10 text-sky-700 border border-sky-200/50 hover:bg-sky-500/20 shadow-sm ring-1 ring-sky-500/5',
+    'P2 (L1)': 'bg-emerald-500/10 text-emerald-700 border border-emerald-200/50 hover:bg-emerald-500/20 shadow-sm ring-1 ring-emerald-500/5',
+    'S (L1)': 'bg-orange-500/10 text-orange-700 border border-orange-200/50 hover:bg-orange-500/20 shadow-sm ring-1 ring-orange-500/5',
+    'M (L1)': 'bg-violet-500/10 text-violet-700 border border-violet-200/50 hover:bg-violet-500/20 shadow-sm ring-1 ring-violet-500/5',
+    'P (L2)': 'bg-indigo-500/10 text-indigo-700 border border-indigo-200/50 hover:bg-indigo-500/20 shadow-sm ring-1 ring-indigo-500/5',
+    'S (L2)': 'bg-teal-500/10 text-teal-700 border border-teal-200/50 hover:bg-teal-500/20 shadow-sm ring-1 ring-teal-500/5',
     'L': 'bg-gradient-to-br from-rose-500 to-rose-600 text-white border-none shadow-md shadow-rose-200 ring-2 ring-rose-200/50 font-black',
   };
 
@@ -102,14 +132,22 @@ export default function ShiftApp() {
   };
 
   // Hitung rekapitulasi shift
-  const shiftTallies = displayOrder.map(personIdx => {
-    const tally = { P: 0, P2: 0, S: 0, M: 0, L: 0 };
+  const shiftTallies = employees.map(emp => {
+    const tally = {
+      'P (L1)': 0,
+      'P2 (L1)': 0,
+      'S (L1)': 0,
+      'M (L1)': 0,
+      'P (L2)': 0,
+      'S (L2)': 0,
+      'L': 0
+    };
     let totalKerja = 0;
     renderMonths.forEach(m => {
       const daysInM = new Date(year, m + 1, 0).getDate();
       for (let d = 1; d <= daysInM; d++) {
         const dayIdx = getDayIndex(year, m, d);
-        const shift = getShift(personIdx, dayIdx);
+        const shift = getShift(emp, dayIdx);
         if (tally[shift] !== undefined) {
           tally[shift]++;
         }
@@ -118,7 +156,7 @@ export default function ShiftApp() {
         }
       }
     });
-    return { personIdx, name: names[personIdx], ...tally, totalKerja };
+    return { id: emp.id, name: emp.name, division: emp.division, ...tally, totalKerja };
   });
 
   return (
@@ -264,26 +302,43 @@ export default function ShiftApp() {
         </div>
 
         {/* Legend */}
-        <div className="bg-white/30 px-8 py-6 flex flex-wrap gap-4 text-sm justify-center border-b border-slate-100/50 print:bg-transparent print:border-none print:p-1 print:mb-2 print:text-[10px]">
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl bg-white shadow-sm border border-slate-100 hover:border-indigo-200 transition-all cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
-            <span className="w-7 h-7 print:w-4 print:h-4 rounded-lg bg-sky-500/10 text-sky-700 border border-sky-200 flex items-center justify-center font-black text-xs print:text-[10px]">P</span>
-            <span className="font-bold text-slate-600 print:text-black">Pagi <span className="opacity-50 text-[10px] font-medium">(06.00 - 15.00 WIB)</span></span>
+        <div className="bg-white/30 px-8 py-6 flex flex-col gap-4 border-b border-slate-100/50 print:bg-transparent print:border-none print:p-1 print:mb-2 text-xs">
+          {/* Division L1 */}
+          <div className="flex flex-wrap items-center gap-4 justify-center">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2 print:text-[8px]">Divisi L1:</span>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100 cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
+              <span className="w-10 h-6 print:w-8 print:h-4 rounded-lg bg-sky-500/10 text-sky-700 border border-sky-200 flex items-center justify-center font-black text-[9px]">P (L1)</span>
+              <span className="font-bold text-slate-600 print:text-black text-[11px] print:text-[9px]">Pagi <span className="opacity-50 font-medium">(06.00 - 15.00 WIB)</span></span>
+            </div>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100 cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
+              <span className="w-12 h-6 print:w-10 print:h-4 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-200 flex items-center justify-center font-black text-[9px]">P2 (L1)</span>
+              <span className="font-bold text-slate-600 print:text-black text-[11px] print:text-[9px]">Pagi 2 <span className="opacity-50 font-medium">(09.00 - 18.00 WIB)</span></span>
+            </div>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100 cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
+              <span className="w-10 h-6 print:w-8 print:h-4 rounded-lg bg-orange-500/10 text-orange-700 border border-orange-200 flex items-center justify-center font-black text-[9px]">S (L1)</span>
+              <span className="font-bold text-slate-600 print:text-black text-[11px] print:text-[9px]">Siang <span className="opacity-50 font-medium">(14.00 - 23.00 WIB)</span></span>
+            </div>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100 cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
+              <span className="w-10 h-6 print:w-8 print:h-4 rounded-lg bg-violet-500/10 text-violet-700 border border-violet-200 flex items-center justify-center font-black text-[9px]">M (L1)</span>
+              <span className="font-bold text-slate-600 print:text-black text-[11px] print:text-[9px]">Malam <span className="opacity-50 font-medium">(22.00 - 07.00 WIB)</span></span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl bg-white shadow-sm border border-slate-100 hover:border-indigo-200 transition-all cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
-            <span className="w-7 h-7 print:w-4 print:h-4 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-200 flex items-center justify-center font-black text-xs print:text-[10px]">P2</span>
-            <span className="font-bold text-slate-600 print:text-black">Pagi 2 <span className="opacity-50 text-[10px] font-medium">(09.00 - 18.00 WIB)</span></span>
-          </div>
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl bg-white shadow-sm border border-slate-100 hover:border-indigo-200 transition-all cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
-            <span className="w-7 h-7 print:w-4 print:h-4 rounded-lg bg-orange-500/10 text-orange-700 border border-orange-200 flex items-center justify-center font-black text-xs print:text-[10px]">S</span>
-            <span className="font-bold text-slate-600 print:text-black">Siang <span className="opacity-50 text-[10px] font-medium">(14.00 - 23.00 WIB)</span></span>
-          </div>
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl bg-white shadow-sm border border-slate-100 hover:border-indigo-200 transition-all cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
-            <span className="w-7 h-7 print:w-4 print:h-4 rounded-lg bg-violet-500/10 text-violet-700 border border-violet-200 flex items-center justify-center font-black text-xs print:text-[10px]">M</span>
-            <span className="font-bold text-slate-600 print:text-black">Malam <span className="opacity-50 text-[10px] font-medium">(22.00 - 07.00 WIB)</span></span>
-          </div>
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl bg-white shadow-sm border border-slate-100 hover:border-indigo-200 transition-all cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
-            <span className="w-7 h-7 print:w-4 print:h-4 rounded-lg bg-rose-500 text-white shadow-sm shadow-rose-200 flex items-center justify-center font-black text-xs print:text-[10px]">L</span>
-            <span className="font-bold text-slate-600 print:text-black">Libur</span>
+
+          {/* Division L2 */}
+          <div className="flex flex-wrap items-center gap-4 justify-center">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2 print:text-[8px]">Divisi L2:</span>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100 cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
+              <span className="w-10 h-6 print:w-8 print:h-4 rounded-lg bg-indigo-500/10 text-indigo-700 border border-indigo-200 flex items-center justify-center font-black text-[9px]">P (L2)</span>
+              <span className="font-bold text-slate-600 print:text-black text-[11px] print:text-[9px]">Pagi <span className="opacity-50 font-medium">(06.00 - 15.00 WIB)</span></span>
+            </div>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100 cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
+              <span className="w-10 h-6 print:w-8 print:h-4 rounded-lg bg-teal-500/10 text-teal-700 border border-teal-200 flex items-center justify-center font-black text-[9px]">S (L2)</span>
+              <span className="font-bold text-slate-600 print:text-black text-[11px] print:text-[9px]">Siang <span className="opacity-50 font-medium">(15.00 - 00.00 WIB)</span></span>
+            </div>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100 cursor-default print:gap-1 print:p-0 print:shadow-none print:border-none print:bg-transparent">
+              <span className="w-6 h-6 print:w-5 print:h-4 rounded-lg bg-rose-500 text-white flex items-center justify-center font-black text-[9px]">L</span>
+              <span className="font-bold text-slate-600 print:text-black text-[11px] print:text-[9px]">Libur</span>
+            </div>
           </div>
         </div>
 
@@ -306,44 +361,78 @@ export default function ShiftApp() {
                         const dayIdx = getDayIndex(year, m, d);
                         const isWeekend = dayIdx % 7 === 5 || dayIdx % 7 === 6;
                         const holiday = getHoliday(year, m, d);
+                        const isToday = today.getFullYear() === year && today.getMonth() === m && today.getDate() === d;
                         return (
                           <th
                             key={d}
-                            className={`p-1.5 font-black text-[9px] border-r border-slate-200/60 print:bg-white ${isWeekend || holiday ? 'text-rose-500 bg-rose-50/30' : 'text-slate-400'}`}
+                            className={`p-1.5 font-black text-[9px] border-r border-slate-200/60 print:bg-white relative group ${
+                              isToday 
+                                ? 'bg-indigo-600/10 text-indigo-700 ring-2 ring-indigo-600/30'
+                                : (isWeekend || holiday ? 'text-rose-500 bg-rose-50/30' : 'text-slate-400')
+                            }`}
                           >
                             <div className="flex flex-col items-center leading-tight">
                               <span className="uppercase">{dayNames[dayIdx % 7]}</span>
-                              <span className="text-xs mt-0.5">{d}</span>
+                              <span className={`text-xs mt-0.5 w-5 h-5 flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white shadow-md font-black' : ''}`}>{d}</span>
                             </div>
+                            {holiday && (
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 hidden group-hover:block bg-slate-900/95 backdrop-blur text-white text-[9px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-200">
+                                <div className="font-black text-rose-400 mb-0.5">Libur Nasional</div>
+                                <div className="font-bold">{holiday.description}</div>
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-b-slate-900/95"></div>
+                              </div>
+                            )}
                           </th>
                         );
                       })}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {displayOrder.map(personIdx => (
-                      <tr key={personIdx} className="group hover:bg-indigo-50/20 transition-colors">
-                        <td className="bg-white font-black text-slate-700 text-[11px] p-2 border-r border-slate-200 print:bg-white">
-                          {names[personIdx]}
-                        </td>
-                        {dates.map(d => {
-                          const dayIdx = getDayIndex(year, m, d);
-                          const shift = getShift(personIdx, dayIdx);
-                          const holiday = getHoliday(year, m, d);
-                          const isWeekend = dayIdx % 7 === 5 || dayIdx % 7 === 6;
-                          return (
-                            <td
-                              key={d}
-                              className={`p-0.5 bg-white border-r border-slate-100 transition-colors print:bg-white print:p-0.5`}
-                            >
-                              <div className={`w-full h-8 sm:h-9 flex items-center justify-center rounded-lg text-[10px] font-black transition-all duration-300 hover:scale-105 print:h-6 print:rounded-md ${shiftColors[shift]} ${holiday ? 'ring-2 ring-rose-400/20' : ''}`}>
-                                {shift}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
+                    {employees.map((emp, empIdx) => {
+                      const nextEmp = employees[empIdx + 1];
+                      const isBoundary = nextEmp && emp.division !== nextEmp.division;
+                      const borderBottomClass = isBoundary ? 'border-b-[3px] border-b-slate-400' : 'border-b border-slate-100';
+
+                      return (
+                        <tr key={emp.id} className="group hover:bg-indigo-50/20 transition-colors">
+                          <td className={`bg-white font-black text-slate-700 text-[11px] p-2 border-r border-slate-200 print:bg-white text-left ${borderBottomClass}`}>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-[11px] print:text-[10px]">{emp.name}</span>
+                              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded w-max mt-0.5 leading-none ${
+                                emp.division === 'L1' ? 'bg-slate-100 text-slate-500 border border-slate-200/50' : 'bg-indigo-50 text-indigo-600 border border-indigo-200/50'
+                              }`}>
+                                {emp.division}
+                              </span>
+                            </div>
+                          </td>
+                          {dates.map(d => {
+                            const dayIdx = getDayIndex(year, m, d);
+                            const shift = getShift(emp, dayIdx);
+                            const holiday = getHoliday(year, m, d);
+                            const isTodayColumn = today.getFullYear() === year && today.getMonth() === m && today.getDate() === d;
+                            return (
+                              <td
+                                key={d}
+                                className={`p-0.5 border-r border-slate-100 transition-colors print:bg-white print:p-0.5 relative group ${borderBottomClass} ${
+                                  isTodayColumn ? 'bg-indigo-50/35 print:bg-transparent' : 'bg-white'
+                                }`}
+                              >
+                                <div className={`w-full h-8 sm:h-9 flex items-center justify-center rounded-lg text-[10px] sm:text-[11px] font-black transition-all duration-300 hover:scale-105 print:h-6 print:rounded-md ${shiftColors[shift]} ${holiday ? 'ring-2 ring-rose-400/20' : ''}`}>
+                                  {shift.split(' ')[0]}
+                                </div>
+                                {holiday && (
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 hidden group-hover:block bg-slate-900/95 backdrop-blur text-white text-[9px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-200">
+                                    <div className="font-black text-rose-400 mb-0.5">Libur Nasional</div>
+                                    <div className="font-bold">{holiday.description}</div>
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-900/95"></div>
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -362,23 +451,36 @@ export default function ShiftApp() {
               <thead>
                 <tr className="bg-slate-50 text-slate-500">
                   <th className="border border-slate-200 p-1 text-left">Karyawan</th>
-                  <th className="border border-slate-200 p-1">P</th>
-                  <th className="border border-slate-200 p-1">P2</th>
-                  <th className="border border-slate-200 p-1">S</th>
-                  <th className="border border-slate-200 p-1">M</th>
+                  <th className="border border-slate-200 p-1 text-[8px]">P</th>
+                  <th className="border border-slate-200 p-1 text-[8px]">P2</th>
+                  <th className="border border-slate-200 p-1 text-[8px]">S</th>
+                  <th className="border border-slate-200 p-1 text-[8px]">M</th>
                   <th className="border border-slate-200 p-1 text-rose-500">L</th>
                   <th className="border border-slate-200 p-1 bg-slate-100">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {shiftTallies.map(t => (
-                  <tr key={t.personIdx} className="text-slate-700 font-bold">
-                    <td className="border border-slate-200 p-1 font-black">{t.name}</td>
-                    <td className="border border-slate-200 p-1 text-center">{t.P}</td>
-                    <td className="border border-slate-200 p-1 text-center">{t.P2}</td>
-                    <td className="border border-slate-200 p-1 text-center">{t.S}</td>
-                    <td className="border border-slate-200 p-1 text-center">{t.M}</td>
-                    <td className="border border-slate-200 p-1 text-center text-rose-500">{t.L}</td>
+                  <tr key={t.id} className="text-slate-700 font-bold">
+                    <td className="border border-slate-200 p-1 font-black">
+                      <div className="flex items-center gap-1">
+                        <span>{t.name}</span>
+                        <span className="text-[7px] text-slate-400 font-medium">({t.division})</span>
+                      </div>
+                    </td>
+                    <td className="border border-slate-200 p-1 text-center font-medium">
+                      {t.division === 'L1' ? (t['P (L1)'] || '-') : (t['P (L2)'] || '-')}
+                    </td>
+                    <td className="border border-slate-200 p-1 text-center font-medium">
+                      {t.division === 'L1' ? (t['P2 (L1)'] || '-') : '-'}
+                    </td>
+                    <td className="border border-slate-200 p-1 text-center font-medium">
+                      {t.division === 'L1' ? (t['S (L1)'] || '-') : (t['S (L2)'] || '-')}
+                    </td>
+                    <td className="border border-slate-200 p-1 text-center font-medium">
+                      {t.division === 'L1' ? (t['M (L1)'] || '-') : '-'}
+                    </td>
+                    <td className="border border-slate-200 p-1 text-center text-rose-500">{t.L || '-'}</td>
                     <td className="border border-slate-200 p-1 text-center bg-slate-50 font-black">{t.totalKerja}</td>
                   </tr>
                 ))}
@@ -442,29 +544,58 @@ export default function ShiftApp() {
                 <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                 Siklus Kerja
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                Siklus kerja mengikuti pola rotasi <span className="text-indigo-600 font-bold">5 hari kerja</span> dan <span className="text-rose-500 font-bold">1 hari libur</span> (5-1) yang berputar secara otomatis setiap minggunya.
-              </p>
+              <ul className="text-sm text-slate-600 space-y-3 font-medium">
+                <li>
+                  <span className="font-bold text-indigo-600 block">Divisi L1</span>
+                  Mengikuti rotasi <span className="font-bold">5 hari kerja & 1 hari libur</span> (5-1) yang berputar otomatis setiap minggunya.
+                </li>
+                <li>
+                  <span className="font-bold text-indigo-600 block">Divisi L2</span>
+                  Masuk <span className="font-bold">5 hari kerja</span> (Senin - Jumat) dengan libur tetap di hari Sabtu & Minggu. Shift (Pagi/Siang) berganti setiap 1 minggu sekali.
+                </li>
+              </ul>
             </div>
             <div className="bg-white/50 p-6 rounded-3xl border border-slate-100 hover:border-indigo-200 transition-all shadow-sm">
               <h3 className="font-black text-slate-900 uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 Waktu Shift
               </h3>
-              <ul className="text-sm text-slate-600 space-y-2 font-medium">
-                <li className="flex justify-between"><span>Pagi (P/P2)</span> <span className="font-black text-slate-900">06:00 / 09:00</span></li>
-                <li className="flex justify-between"><span>Siang (S)</span> <span className="font-black text-slate-900">14:00 - 23:00</span></li>
-                <li className="flex justify-between"><span>Malam (M)</span> <span className="font-black text-slate-900">22:00 - 07:00</span></li>
-              </ul>
+              <div className="space-y-3 text-xs text-slate-600 font-medium">
+                <div>
+                  <span className="font-bold text-emerald-600 block mb-1">Divisi L1</span>
+                  <ul className="space-y-1">
+                    <li className="flex justify-between"><span>Pagi (P / P2)</span> <span className="font-black text-slate-900">06:00 - 15:00 / 09:00 - 18:00</span></li>
+                    <li className="flex justify-between"><span>Siang (S)</span> <span className="font-black text-slate-900">14:00 - 23:00</span></li>
+                    <li className="flex justify-between"><span>Malam (M)</span> <span className="font-black text-slate-900">22:00 - 07:00</span></li>
+                  </ul>
+                </div>
+                <div className="border-t border-slate-200/50 pt-2">
+                  <span className="font-bold text-emerald-600 block mb-1">Divisi L2</span>
+                  <ul className="space-y-1">
+                    <li className="flex justify-between"><span>Pagi (P)</span> <span className="font-black text-slate-900">06:00 - 15:00</span></li>
+                    <li className="flex justify-between"><span>Siang (S)</span> <span className="font-black text-slate-900">15:00 - 00:00</span></li>
+                  </ul>
+                </div>
+              </div>
             </div>
             <div className="bg-white/50 p-6 rounded-3xl border border-slate-100 hover:border-indigo-200 transition-all shadow-sm">
               <h3 className="font-black text-slate-900 uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                 Ketentuan Libur
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                Hari libur bergeser maju setiap minggu. Jika ada <span className="text-rose-500 font-bold text-xs uppercase">Tgl Merah</span>, operasional tetap berjalan sesuai jadwal yang tertera.
-              </p>
+              <ul className="text-sm text-slate-600 space-y-3 font-medium">
+                <li>
+                  <span className="font-bold text-rose-500 block">Divisi L1</span>
+                  Hari libur bergeser maju 1 hari setiap minggu secara otomatis.
+                </li>
+                <li>
+                  <span className="font-bold text-rose-500 block">Divisi L2</span>
+                  Hari libur tetap pada hari Sabtu & Minggu.
+                </li>
+                <li className="text-xs text-slate-500 leading-tight">
+                  * Catatan: Untuk Tanggal Merah / Libur Nasional, operasional tetap berjalan sesuai jadwal yang tertera.
+                </li>
+              </ul>
             </div>
           </div>
         </div>
