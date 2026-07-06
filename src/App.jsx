@@ -52,9 +52,27 @@ function getShift(emp, dayIndex) {
     return `${rawShift} (L1)`;
   } else if (emp.division === 'L2') {
     const D = mod(dayIndex, 7);
-    if (D === 5 || D === 6) return 'L'; // Sabtu & Minggu libur
-
     const W = Math.floor(dayIndex / 7); // Indeks Minggu
+
+    if (dayIndex < 47) { // Sebelum 11 Juli 2026
+      if (D === 5 || D === 6) return 'L'; // Sabtu & Minggu libur
+    } else { // Mulai 11 Juli 2026
+      if (D === 5) { // Sabtu
+        if (emp.name === 'Denni') {
+          return (W % 2 === 0) ? 'S (L2)' : 'L';
+        } else { // Ihsan
+          return (W % 2 === 0) ? 'L' : 'S (L2)';
+        }
+      } else if (D === 6) { // Minggu
+        if (emp.name === 'Denni') {
+          return (W % 2 === 0) ? 'L' : 'S (L2)';
+        } else { // Ihsan
+          return (W % 2 === 0) ? 'S (L2)' : 'L';
+        }
+      }
+    }
+
+    // Weekdays (Senin - Jumat) tetap dengan pola rotasi mingguan yang ada
     if (emp.name === 'Denni') {
       return (W % 2 === 0) ? 'S (L2)' : 'P (L2)';
     } else { // Ihsan
