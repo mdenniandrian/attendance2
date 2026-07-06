@@ -54,9 +54,9 @@ function getShift(emp, dayIndex) {
     const D = mod(dayIndex, 7);
     const W = Math.floor(dayIndex / 7); // Indeks Minggu
 
-    if (dayIndex < 47) { // Sebelum 11 Juli 2026
+    if (dayIndex < 40) { // Sebelum 4 Juli 2026
       if (D === 5 || D === 6) return 'L'; // Sabtu & Minggu libur
-    } else { // Mulai 11 Juli 2026
+    } else { // Mulai 4 Juli 2026
       if (D === 5) { // Sabtu
         if (emp.name === 'Denni') {
           return (W % 2 === 0) ? 'S (L2)' : 'L';
