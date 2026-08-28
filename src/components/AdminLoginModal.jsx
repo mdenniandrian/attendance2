@@ -131,7 +131,6 @@ export default function AdminLoginModal({ isOpen, onClose, onSuccess }) {
               />
               <span>Ingat sesi login</span>
             </label>
-            <span className="text-[10px] text-slate-400 font-medium">Default: admin / admin</span>
           </div>
 
           <div className="pt-4">

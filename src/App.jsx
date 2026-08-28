@@ -193,58 +193,34 @@ export default function ShiftApp() {
         }
       `}</style>
 
-      {/* Top Main Navigation Bar (Screen Only) */}
-      <div className="max-w-7xl mx-auto mb-8 print:hidden">
-        <div className="bg-white/80 backdrop-blur-2xl px-6 py-4 rounded-3xl border border-white/80 shadow-lg shadow-slate-200/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-indigo-50 rounded-2xl border border-indigo-100 shadow-sm">
-              <img src={logoMaxcloud} alt="Maxcloud Logo" className="h-9 w-auto object-contain" />
+      {/* VIEW: BACKOFFICE MANAGEMENT */}
+      {activeView === 'backoffice' && isAuthenticated && (
+        <div className="max-w-7xl mx-auto space-y-6 print:hidden animate-in fade-in duration-300">
+          {/* Backoffice Header & Navigation */}
+          <div className="bg-white/85 backdrop-blur-2xl p-6 rounded-3xl border border-white/80 shadow-xl shadow-slate-200/50 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-indigo-50 rounded-2xl border border-indigo-100 shadow-sm">
+                <img src={logoMaxcloud} alt="Maxcloud Logo" className="h-9 w-auto object-contain" />
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                  ⚙️ Admin Backoffice
+                </span>
+                <h2 className="text-xl font-black text-slate-900 leading-tight mt-1">Manajemen Jadwal & Karyawan</h2>
+                <p className="text-xs text-slate-500 font-medium">PT Awan Data Indonesia</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-black text-slate-900 leading-tight">Jadwal Shift Maxcloud</h2>
-              <p className="text-xs text-slate-500 font-medium">PT Awan Data Indonesia</p>
-            </div>
-          </div>
 
-          {/* View Mode Switcher */}
-          <div className="flex items-center gap-3">
-            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/70 shadow-inner">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setActiveView('dashboard')}
-                className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                  activeView === 'dashboard'
-                    ? 'bg-white text-indigo-700 shadow-md shadow-slate-200 scale-100'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
+                className="px-5 py-2.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-black text-xs border border-indigo-100 transition-all flex items-center gap-2 shadow-sm"
               >
                 <span>📅</span>
-                <span>Tampilan Jadwal</span>
+                <span>Kembali ke Jadwal</span>
               </button>
 
-              <button
-                type="button"
-                onClick={handleOpenBackoffice}
-                className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                  activeView === 'backoffice'
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-100'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <span>{isAuthenticated ? '⚙️' : '🔒'}</span>
-                <span>Management Backoffice</span>
-                {totalOverridesCount > 0 && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black ${
-                    activeView === 'backoffice' ? 'bg-white/25 text-white' : 'bg-indigo-100 text-indigo-700'
-                  }`}>
-                    {totalOverridesCount}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* Logout Button if in Backoffice and Authenticated */}
-            {activeView === 'backoffice' && isAuthenticated && (
               <button
                 type="button"
                 onClick={handleLogout}
@@ -256,21 +232,9 @@ export default function ShiftApp() {
                 </svg>
                 <span>Logout</span>
               </button>
-            )}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Admin Login Modal */}
-      <AdminLoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onSuccess={handleLoginSuccess}
-      />
-
-      {/* VIEW: BACKOFFICE MANAGEMENT */}
-      {activeView === 'backoffice' && isAuthenticated && (
-        <div className="max-w-7xl mx-auto space-y-6 print:hidden animate-in fade-in duration-300">
           {/* Backoffice Sub-Tabs */}
           <div className="bg-white/70 backdrop-blur-xl p-2 rounded-2xl border border-white flex flex-wrap gap-2 shadow-sm">
             <button
@@ -344,8 +308,8 @@ export default function ShiftApp() {
         </div>
       )}
 
-      {/* VIEW: DASHBOARD JADWAL (Printable & Live Schedule) */}
-      <div className={`relative max-w-7xl mx-auto bg-white/70 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] border border-white/60 print:bg-white print-card print:border-none print:shadow-none print:rounded-none print:overflow-visible overflow-visible ${
+      {/* VIEW: DASHBOARD JADWAL (Single Unified Card) */}
+      <div className={`relative max-w-7xl mx-auto bg-white/80 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] border border-white/80 print:bg-white print-card print:border-none print:shadow-none print:rounded-none print:overflow-visible overflow-visible ${
         activeView === 'backoffice' ? 'hidden print:block' : 'block'
       }`}>
         <table className="w-full">
@@ -371,90 +335,108 @@ export default function ShiftApp() {
             <tr className="block print:table-row">
               <td className="block print:table-cell">
 
-                {/* Header & Controls */}
-                <div className="relative bg-white/40 border-b border-white/40 p-8 sm:p-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 print:bg-transparent print:bg-none print:text-black print:p-0 print:mb-4">
-                  <div className="w-full relative z-10">
-                    <div className="flex items-center gap-6 mb-8 print:hidden">
-                      <div className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100">
-                        <img src={logoMaxcloud} alt="Maxcloud Logo" className="h-12 w-auto object-contain" />
-                      </div>
-                      <div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 leading-tight">Jadwal Shift CS</h1>
-                        <p className="text-slate-500 font-medium">Manajemen Operasional PT Awan Data Indonesia</p>
-                      </div>
+                {/* Unified Single Header & Controls */}
+                <div className="relative bg-white/40 border-b border-white/60 p-6 sm:p-8 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 print:bg-transparent print:bg-none print:text-black print:p-0 print:mb-4">
+                  {/* Left: Branding & Subtitle */}
+                  <div className="flex items-center gap-4 print:hidden">
+                    <div className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
+                      <img src={logoMaxcloud} alt="Maxcloud Logo" className="h-10 w-auto object-contain" />
                     </div>
-
-                    <div id="controls-container" className="flex flex-col sm:flex-row gap-4 items-center print:hidden">
-                      <div className="group relative flex items-center bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl px-6 py-3 transition-all shadow-sm hover:shadow-md">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-4">Bulan</label>
-                        <select
-                          value={month}
-                          onChange={(e) => setMonth(Number(e.target.value))}
-                          className="bg-transparent text-slate-900 font-bold outline-none cursor-pointer appearance-none pr-8 min-w-[120px]"
-                        >
-                          {monthNames.map((m, i) => (
-                            <option key={i} value={i}>{m}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-6 pointer-events-none group-hover:text-indigo-500 transition-colors">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
-
-                      <div className="group relative flex items-center bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl px-6 py-3 transition-all shadow-sm hover:shadow-md">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-4">Tahun</label>
-                        <select
-                          value={year}
-                          onChange={(e) => setYear(Number(e.target.value))}
-                          className="bg-transparent text-slate-900 font-bold outline-none cursor-pointer appearance-none pr-8 min-w-[80px]"
-                        >
-                          {[2025, 2026, 2027, 2028].map(y => (
-                            <option key={y} value={y}>{y}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-6 pointer-events-none group-hover:text-indigo-500 transition-colors">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
+                    <div>
+                      <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 leading-tight">Jadwal Shift CS</h1>
+                      <p className="text-xs sm:text-sm text-slate-500 font-medium">Manajemen Operasional PT Awan Data Indonesia</p>
                     </div>
                   </div>
 
-                  <div className="relative z-20 print:hidden">
-                    <button
-                      onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                      className="group bg-indigo-600 text-white hover:bg-indigo-700 font-bold py-4 px-8 rounded-2xl flex items-center gap-3 transition-all duration-300 hover:scale-105 shadow-xl shadow-indigo-200 whitespace-nowrap"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
-                      </svg>
-                      <span>Export Laporan</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isExportMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    
-                    {isExportMenuOpen && (
-                      <div className="absolute right-0 mt-4 w-48 bg-white rounded-2xl shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden flex flex-col z-50 animate-in fade-in slide-in-from-top-4 duration-300">
-                        <button
-                          onClick={() => { setIsExportMenuOpen(false); handleExportPDF(); }}
-                          className="px-6 py-4 text-left text-sm font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 border-b border-slate-50 transition-colors flex items-center gap-3"
-                        >
-                          <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
-                          Laporan Bulanan
-                        </button>
-                        <button
-                          onClick={() => { setIsExportMenuOpen(false); handleExportYearlyPDF(); }}
-                          className="px-6 py-4 text-left text-sm font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-3"
-                        >
-                          <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
-                          Laporan Tahunan
-                        </button>
+                  {/* Middle & Right: Controls, Export, and Backoffice Button */}
+                  <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-between xl:justify-end print:hidden">
+                    {/* Month Selector */}
+                    <div className="group relative flex items-center bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl px-4 py-2.5 transition-all shadow-sm hover:shadow-md">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-3">Bulan</label>
+                      <select
+                        value={month}
+                        onChange={(e) => setMonth(Number(e.target.value))}
+                        className="bg-transparent text-slate-900 text-sm font-bold outline-none cursor-pointer appearance-none pr-6 min-w-[110px]"
+                      >
+                        {monthNames.map((m, i) => (
+                          <option key={i} value={i}>{m}</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 pointer-events-none group-hover:text-indigo-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                        </svg>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Year Selector */}
+                    <div className="group relative flex items-center bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl px-4 py-2.5 transition-all shadow-sm hover:shadow-md">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-3">Tahun</label>
+                      <select
+                        value={year}
+                        onChange={(e) => setYear(Number(e.target.value))}
+                        className="bg-transparent text-slate-900 text-sm font-bold outline-none cursor-pointer appearance-none pr-6 min-w-[70px]"
+                      >
+                        {[2025, 2026, 2027, 2028].map(y => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 pointer-events-none group-hover:text-indigo-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Export Dropdown */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                        className="bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-2xl border border-slate-200 flex items-center gap-2 transition-all shadow-sm hover:shadow hover:border-slate-300 text-xs sm:text-sm whitespace-nowrap"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
+                        </svg>
+                        <span>Export</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-300 ${isExportMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {isExportMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden flex flex-col z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <button
+                            onClick={() => { setIsExportMenuOpen(false); handleExportPDF(); }}
+                            className="px-5 py-3 text-left text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 border-b border-slate-50 transition-colors flex items-center gap-2.5"
+                          >
+                            <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
+                            <span>Cetak PDF Bulanan</span>
+                          </button>
+                          <button
+                            onClick={() => { setIsExportMenuOpen(false); handleExportYearlyPDF(); }}
+                            className="px-5 py-3 text-left text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-2.5"
+                          >
+                            <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
+                            <span>Cetak PDF Tahunan</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Backoffice Button */}
+                    <button
+                      type="button"
+                      onClick={handleOpenBackoffice}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 px-5 rounded-2xl flex items-center gap-2 transition-all shadow-md shadow-indigo-200 hover:scale-[1.02] text-xs sm:text-sm whitespace-nowrap"
+                    >
+                      <span>{isAuthenticated ? '⚙️' : '🔒'}</span>
+                      <span>Backoffice</span>
+                      {totalOverridesCount > 0 && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-black bg-white/20 text-white">
+                          {totalOverridesCount}
+                        </span>
+                      )}
+                    </button>
                   </div>
                 </div>
 
